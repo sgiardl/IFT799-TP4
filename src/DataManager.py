@@ -48,12 +48,15 @@ class DataManager:
             'ub.test': cols_dict['data']
         }
 
-        self.data_dict = {file: pd.read_csv(join(file_path, file),
-                                            sep='\t' if 'data' in file or
-                                                        'base' in file or
-                                                        'test' in file else '|',
-                                            names=cols,
-                                            encoding='iso8859-1') for file, cols in files_dict.items()}
+        try:
+            self.data_dict = {file: pd.read_csv(join(file_path, file),
+                                                sep='\t' if 'data' in file or
+                                                            'base' in file or
+                                                            'test' in file else '|',
+                                                names=cols,
+                                                encoding='iso8859-1') for file, cols in files_dict.items()}
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Please download the dataset and save it as '{file_path}' to use this script")
 
         self.users = self.get_info(0)
         self.items = self.get_info(1)
