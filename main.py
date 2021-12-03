@@ -6,6 +6,10 @@ Olivier Lefebvre
 Simon Giard-Leroux
 """
 
+from os.path import join
+
+from src.DataManager import DataManager
+
 if __name__ == '__main__':
-    pass
+    data_manager = DataManager(file_path=join('data', 'MovieLens-100k', 'ml-100k'))
 
