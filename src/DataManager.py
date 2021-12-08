@@ -62,6 +62,23 @@ class DataManager:
         self.items = self.get_info(1)
         self.ratings = self.get_info(2)
 
+        # On veut créer un dataframe de tous les items notés pour chaque user
+        self.data_dict['user_dict'] = {}
+        dataframe_headers = ['item id', 'rating']
+
+        # On initialise une liste vide pour chaque user
+        for it_user in self.data_dict['u.data']['user id'].unique():
+            self.data_dict['user_dict'][it_user] = []  # pd.DataFrame(columns=dataframe_headers)
+
+        # On ajoute tous les rankings aux users appropriés
+        for _, transaction in self.data_dict['u.data'].iterrows():
+            self.data_dict['user_dict'][transaction['user id']].append([transaction['item id'], transaction['rating']])
+
+        # On transforme les listes de chaque user en DataFrame
+        for index in self.data_dict['user_dict'].keys():
+            self.data_dict['user_dict'][index] = pd.DataFrame(data=self.data_dict['user_dict'][index],
+                                                              columns=dataframe_headers)
+
     def __getitem__(self, item) -> pd.DataFrame:
         return self.data_dict[item]
 
