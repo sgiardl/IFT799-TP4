@@ -18,4 +18,4 @@ if __name__ == '__main__':
 
     ranking_predictor = RankingPredictor(data_manager, dict_name='user_dict')
    # ranking_predictor(data_manager, user_id=1, item_id=1)
-    ranking_predictor.pearson_similarity(1, 2)
+    ranking_predictor.get_knn(1, 2, 3)

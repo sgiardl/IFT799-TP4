@@ -17,7 +17,8 @@ class RankingPredictor:
                  data_manager: DataManager,
                  dict_name: str = 'user_dict'):
         self.df = data_manager[dict_name]
-        self.__pearson_values = {}  # Empty dict to store previously pearson_similarity values
+        self.__pearson_values = {}  # Empty dict to store previously computed pearson_similarity values
+        self.__nearest_neighbor = {}  # Empty dict to store previously computed nearest neighbors
 
     def __call__(self,
                  user_id: int,
@@ -36,12 +37,37 @@ class RankingPredictor:
         """
         print()
 
-    def pearson_similarity(self, user1Id, user2Id):
+    def get_knn(self, user1Id: int, itemId: int, k: int):
+        """
+        à faire : On calcule tous les + proches voisins, puis filtre selon l'item_id, puis retourne les k plus proches
+        :param user1Id:
+        :param itemId:
+        :param k:
+        :return:
+        """
+        if not user1Id in self.__nearest_neighbor:  # Si on ne connait pas encore ses plus proches voisins
+            # On obtient un array de tous les autres users et leur similarité
+            otherUsers = np.array([[UserIt_Id, self.pearson_similarity(user1Id, UserIt_Id)]
+                                   for UserIt_Id in self.df if UserIt_Id != user1Id])
+            # On retire les Users qui ont une similarité de nan
+            otherUsers = otherUsers[~np.isnan(otherUsers).any(axis=1)]
+
+            # On sort les users selon le coefficient de pearson
+            sorting_indexes = otherUsers[:, 1].argsort()[::-1]
+            self.__nearest_neighbor[user1Id] = otherUsers[sorting_indexes]
+
+        # On cherche les k plus proches voisins qui ont notés l'item d'intérêt
+        usersWithItem = [[us_id, us_ps] for us_id, us_ps in self.__nearest_neighbor[user1Id]
+                         if itemId in self.df[us_id]['item id']]
+
+        return usersWithItem[:k]
+
+    def pearson_similarity(self, user1Id: int, user2Id: int):
         """
         Computes the pearson similarity between two users, then stores values.
         :param user1Id: User 1 id
         :param user2Id: User 2 id
-        :return: The pearson similarity between two users
+        :return: The pearson similarity between the two users
         """
         if not f"{min(user1Id, user2Id)}-{max(user1Id, user2Id)}" in self.__pearson_values:
             # On prend les ratings des deux users
