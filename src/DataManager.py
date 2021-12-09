@@ -106,7 +106,7 @@ class DataManager:
                                                             'pearson': self.get_similarity(set, i, j)},
                                                            ignore_index=True)
 
-                pearson_df.to_csv(f'results/{set}.base.pearson.csv', index=False)
+                pearson_df.to_csv(file_name, index=False)
 
             pearson_df = pearson_df.append(pd.DataFrame({'user id 1': pearson_df['user id 2'],
                                                          'user id 2': pearson_df['user id 1'],
