@@ -8,34 +8,47 @@ Simon Giard-Leroux
 
 from scipy.stats import pearsonr
 from src.DataManager import DataManager
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 
 class RankingPredictor:
     def __init__(self,
                  data_manager: DataManager,
-                 dict_name: str = 'user_dict'):
+                 dict_name: str = 'ua.base'):
         self.df = data_manager[dict_name]
         self.__pearson_values = {}  # Empty dict to store previously computed pearson_similarity values
         self.__nearest_neighbor = {}  # Empty dict to store previously computed nearest neighbors
 
     def __call__(self,
-                 user_id: int,
-                 item_id: int):
-        # Get the user's ratings
-        u_ratings = self.df[user_id]
+                 values_to_predict: pd.DataFrame,
+                 k: int):
 
-        # Appliquer l'algo K-NN
+        rating_true = []
+        rating_pred = []
 
-        # laisse tomber la suite
-        """# We get values for each user
-        for v_id, v_df in data_manager[dict_name].items():
-            if v_id != user_id:  # Si ce n'est pas le user que l'on cherche
-                if item_id in data_manager['user_dict'][1]['item id']:  # Si le user v a noté l'item en question
-                    # On construit
-        """
-        print()
+        # Pour toutes les valeurs à prédire
+        for _, row in tqdm(values_to_predict.iterrows(), total=len(values_to_predict)):
+            user_id = row['user id']
+            item_id = row['item id']
+            rating_true.append(row['rating'])
+
+            pred_value = self.predict_rating(user_id, item_id, k)
+            rating_pred.append(pred_value)
+            # print(f"original : {row['rating']},   predicted : {pred_value}")
+
+        mae = mean_absolute_error(rating_true, rating_pred)
+        rmse = (mean_squared_error(rating_true, rating_pred)) ** (1 / 2)
+
+        self.rating_pred = rating_pred
+        self.rating_true = rating_pred
+        self.mae = mae
+        self. rmse = rmse
+
+        return {'mae': mae, 'rmse': rmse}
+
 
     def get_knn(self, user1Id: int, itemId: int, k: int):
         """
@@ -58,7 +71,7 @@ class RankingPredictor:
 
         # On cherche les k plus proches voisins qui ont notés l'item d'intérêt
         usersWithItem = [[us_id, us_ps] for us_id, us_ps in self.__nearest_neighbor[user1Id]
-                         if itemId in self.df[us_id]['item id']]
+                         if itemId in self.df[us_id]['item id'].values]
 
         return usersWithItem[:k]
 
@@ -93,3 +106,21 @@ class RankingPredictor:
                 self.__pearson_values[f"{min(user1Id, user2Id)}-{max(user1Id, user2Id)}"] = ps
 
         return self.__pearson_values[f"{min(user1Id, user2Id)}-{max(user1Id, user2Id)}"]
+
+    def predict_rating(self, userId: int, itemId: int, k: int = 10):
+        # On obtient la liste des K plus proches voisins qui ont noté l'item
+        userKnn = self.get_knn(userId, itemId, k)
+
+        # On calcul le rating
+        ratingSum = 0
+        similarity_norm = 0
+
+        for userIt_Id, similarity in userKnn:
+            userIt_rating = self.df[userIt_Id].loc[self.df[userIt_Id]['item id'] == itemId]['rating'].mean()
+            ratingSum += similarity * userIt_rating
+            similarity_norm += abs(similarity)
+
+        if similarity_norm > 0:
+            return ratingSum / similarity_norm
+        else:
+            return np.nan  # Si aucun rating estimé, on retourne nan

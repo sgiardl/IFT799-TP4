@@ -61,26 +61,30 @@ class DataManager:
         self.users = self.get_info(0)
         self.items = self.get_info(1)
         self.ratings = self.get_info(2)
-
-        # On veut créer un dataframe de tous les items notés pour chaque user
-        self.data_dict['user_dict'] = {}
-        dataframe_headers = ['item id', 'rating']
-
-        # On initialise une liste vide pour chaque user
-        for it_user in self.data_dict['u.data']['user id'].unique():
-            self.data_dict['user_dict'][it_user] = []  # pd.DataFrame(columns=dataframe_headers)
-
-        # On ajoute tous les rankings aux users appropriés
-        for _, transaction in self.data_dict['u.data'].iterrows():
-            self.data_dict['user_dict'][transaction['user id']].append([transaction['item id'], transaction['rating']])
-
-        # On transforme les listes de chaque user en DataFrame
-        for index in self.data_dict['user_dict'].keys():
-            self.data_dict['user_dict'][index] = pd.DataFrame(data=self.data_dict['user_dict'][index],
-                                                              columns=dataframe_headers)
+        # Transform data
+        for name in ['u.data', 'u1.base', 'u2.base', 'u3.base', 'u4.base', 'u5.base', 'ua.base']:
+            self.transform_users_data(name)
 
     def __getitem__(self, item) -> pd.DataFrame:
         return self.data_dict[item]
 
     def get_info(self, index: int) -> int:
         return int(self.data_dict['u.info'].iloc[index, 0].split(' ')[0])
+
+    def transform_users_data(self, data_name: str):
+        # On veut créer un dataframe de tous les items notés pour chaque user
+        self.data_dict[f'{data_name}_dict'] = {}
+        dataframe_headers = ['item id', 'rating']
+
+        # On initialise une liste vide pour chaque user
+        for it_user in self.data_dict[data_name]['user id'].unique():
+            self.data_dict[f'{data_name}_dict'][it_user] = []
+
+        # On ajoute tous les rankings aux users appropriés
+        for _, transaction in self.data_dict[data_name].iterrows():
+            self.data_dict[f'{data_name}_dict'][transaction['user id']].append([transaction['item id'], transaction['rating']])
+
+        # On transforme les listes de chaque user en DataFrame
+        for index in self.data_dict[f'{data_name}_dict'].keys():
+            self.data_dict[f'{data_name}_dict'][index] = pd.DataFrame(data=self.data_dict[f'{data_name}_dict'][index],
+                                                              columns=dataframe_headers)
