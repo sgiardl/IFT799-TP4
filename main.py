@@ -19,7 +19,7 @@ if __name__ == '__main__':
         ranking_predictor = RankingPredictor(data_manager, dict_name=f'u{test_num}.base_dict')
         for k in range(5, 30, 5):
             print(f"Test pour le fichier : {test_num} avec valeur de k = {k}")
-            print(f" results :{ranking_predictor(data_manager['u1.test'], k=k)}")
+            print(f" results :{ranking_predictor(data_manager[f'u{test_num}.test'], k=k)}")
             liste_rankers.append({'k': k,
                                   'test_num': test_num,
                                   'problems': ranking_predictor.problems,
