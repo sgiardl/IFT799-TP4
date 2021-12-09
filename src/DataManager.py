@@ -6,6 +6,7 @@ Olivier Lefebvre
 Simon Giard-Leroux
 """
 
+import numpy as np
 from os.path import join
 import pandas as pd
 
@@ -49,12 +50,12 @@ class DataManager:
         }
 
         try:
-            self.data_dict = {file: pd.read_csv(join(file_path, file),
-                                                sep='\t' if 'data' in file or
-                                                            'base' in file or
-                                                            'test' in file else '|',
-                                                names=cols,
-                                                encoding='iso8859-1') for file, cols in files_dict.items()}
+            self.data_dict = {file: {'data': pd.read_csv(join(file_path, file),
+                                                         sep='\t' if 'data' in file or
+                                                                     'base' in file or
+                                                                     'test' in file else '|',
+                                                         names=cols,
+                                                         encoding='iso8859-1')} for file, cols in files_dict.items()}
         except FileNotFoundError:
             raise FileNotFoundError(f"Please download the dataset and save it as '{file_path}' to use this script")
 
@@ -62,8 +63,19 @@ class DataManager:
         self.items = self.get_info(1)
         self.ratings = self.get_info(2)
 
+        self.process_data()
+
     def __getitem__(self, item) -> pd.DataFrame:
         return self.data_dict[item]
 
     def get_info(self, index: int) -> int:
-        return int(self.data_dict['u.info'].iloc[index, 0].split(' ')[0])
+        return int(self.data_dict['u.info']['data'].iloc[index, 0].split(' ')[0])
+
+    def process_data(self) -> None:
+        movie_matrix = np.zeros((self.users, self.items))
+
+        for _, row in self.data_dict['u1.base']['data'].iterrows():
+            movie_matrix[row['user id'] - 1, row['item id'] - 1] = row['rating']
+
+        self.data_dict['u1.base']['movie_matrix'] = movie_matrix
+
