@@ -21,6 +21,7 @@ class RankingPredictor:
         self.df = data_manager[dict_name]
         self.__pearson_values = {}  # Empty dict to store previously computed pearson_similarity values
         self.__nearest_neighbor = {}  # Empty dict to store previously computed nearest neighbors
+        self.problems = []
 
     def __call__(self,
                  values_to_predict: pd.DataFrame,
@@ -33,19 +34,21 @@ class RankingPredictor:
         for _, row in tqdm(values_to_predict.iterrows(), total=len(values_to_predict)):
             user_id = row['user id']
             item_id = row['item id']
-            rating_true.append(row['rating'])
 
             pred_value = self.predict_rating(user_id, item_id, k)
-            rating_pred.append(pred_value)
+            if not np.isnan(pred_value):
+                rating_true.append(row['rating'])
+                rating_pred.append(pred_value)
+
             # print(f"original : {row['rating']},   predicted : {pred_value}")
+        self.rating_pred = rating_pred
+        self.rating_true = rating_pred
 
         mae = mean_absolute_error(rating_true, rating_pred)
         rmse = (mean_squared_error(rating_true, rating_pred)) ** (1 / 2)
 
-        self.rating_pred = rating_pred
-        self.rating_true = rating_pred
         self.mae = mae
-        self. rmse = rmse
+        self.rmse = rmse
 
         return {'mae': mae, 'rmse': rmse}
 
@@ -121,6 +124,10 @@ class RankingPredictor:
             similarity_norm += abs(similarity)
 
         if similarity_norm > 0:
+            if np.isnan(ratingSum / similarity_norm):
+                print(f"Problème: un problème s'est produit dans le code pour le user {userId} et l'item {itemId}")
             return ratingSum / similarity_norm
         else:
+            self.problems.append([userId, itemId])
+            # print(f"Problème: impossible de prédir pour le User :{userId} et l'item : {itemId}")
             return np.nan  # Si aucun rating estimé, on retourne nan
