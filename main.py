@@ -13,7 +13,8 @@ from src.RecommSystem import RecommSystem
 
 
 if __name__ == '__main__':
-    data_manager = DataManager(file_path=join('data', 'MovieLens-100k', 'ml-100k'))
+    data_manager = DataManager(file_path=join('data', 'MovieLens-100k', 'ml-100k'),
+                               n_neighbors=5)
 
-    recomm_system = RecommSystem(learning_data=data_manager['u1.base'],
-                                 testing_data=data_manager['u1.test'])
+    # recomm_system = RecommSystem(learning_data=data_manager['u1.base'],
+    #                              testing_data=data_manager['u1.test'])

@@ -33,19 +33,19 @@ class RecommSystem:
             item_id = row['item id']
             rating_true.append(row['rating'])
 
-            a = self.learning_data['movie_matrix']
-            x = a[np.where(a[:, item_id - 1] > 0)]
-
-            n_neighbors = len(x) if self.n_neighbors > len(x) else self.n_neighbors
-
-            knn = NearestNeighbors(n_neighbors=n_neighbors).fit(x).kneighbors()[1]
+            # a = self.learning_data['movie_matrix']
+            # x = a[np.where(a[:, item_id - 1] > 0)]
+            #
+            # n_neighbors = len(x) if self.n_neighbors > len(x) else self.n_neighbors
+            #
+            # knn = NearestNeighbors(n_neighbors=n_neighbors).fit(x).kneighbors()[1]
 
             numerator = 0
             denominator = 0
 
             for nn in knn[user_id - 1]:
-                numerator += self.get_similarity(user_id, x[nn, :]) * x[nn, item_id - 1]
-                denominator += abs(self.get_similarity(user_id, x[nn, :]))
+                numerator += self.get_similarity(user_id, nn) * x[nn, item_id - 1]
+                denominator += abs(self.get_similarity(user_id, nn))
 
             rating_pred.append(numerator / denominator)
 
@@ -57,20 +57,22 @@ class RecommSystem:
 
         print(f'{mae=:.2f}, {rmse=:.2f}')
 
-    def get_similarity(self, user_id_1: int, data_2: np.array) -> float:
+    # def get_similarity(self, user_id_1: int, data_2: np.array) -> float:
+    def get_similarity(self, user_id_1: int, user_id_2: int) -> float:
         data_1 = self.get_user_info(user_id_1)
+        data_2 = self.get_user_info(user_id_2)
 
-        data_2_df = pd.DataFrame(columns=['item id', 'rating'])
+        # data_2_df = pd.DataFrame(columns=['item id', 'rating'])
+        #
+        # for i, val in enumerate(data_2, start=1):
+        #     if val > 0:
+        #         data_2_df = data_2_df.append({'item id': int(i), 'rating': int(val)}, ignore_index=True)
 
-        for i, val in enumerate(data_2, start=1):
-            if val > 0:
-                data_2_df = data_2_df.append({'item id': int(i), 'rating': int(val)}, ignore_index=True)
-
-        mask_1 = self.get_mask(data_1, data_2_df)
-        mask_2 = self.get_mask(data_2_df, data_1)
+        mask_1 = self.get_mask(data_1, data_2)
+        mask_2 = self.get_mask(data_2, data_1)
 
         masked_data_1 = self.mask_data(data_1, mask_1)
-        masked_data_2 = self.mask_data(data_2_df, mask_2)
+        masked_data_2 = self.mask_data(data_2, mask_2)
 
         if len(masked_data_1) >= 2 and masked_data_1.std() > 0 and masked_data_2.std() > 0:
             return pearsonr(masked_data_1, masked_data_2)[0]
