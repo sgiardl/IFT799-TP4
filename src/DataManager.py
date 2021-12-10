@@ -108,13 +108,16 @@ class DataManager:
 
                 pearson_df.to_csv(file_name, index=False)
 
-            pearson_df = pearson_df.append(pd.DataFrame({'user id 1': pearson_df['user id 2'],
-                                                         'user id 2': pearson_df['user id 1'],
-                                                         'pearson': pearson_df['pearson']}))
+            # to remove
+            # pearson_df = pearson_df.append(pd.DataFrame({'user id 1': pearson_df['user id 2'],
+            #                                              'user id 2': pearson_df['user id 1'],
+            #                                              'pearson': pearson_df['pearson']}))
 
-            self.data_dict[f'{set}.base']['neighbors'] = {i:
-                pearson_df.loc[pearson_df['user id 1'] == i].sort_values('pearson').head(self.n_neighbors)
-                for i in range(1, self.users + 1)}
+            # self.data_dict[f'{set}.base']['neighbors'] = {i:
+            #     pearson_df.loc[pearson_df['user id 1'] == i | pearson_df['user id 2'] == i]
+            #     .sort_values('pearson')
+            #     .head(self.n_neighbors)
+            #     for i in range(1, self.users + 1)}
 
     def get_similarity(self, set: str, user_id_1: int, user_id_2: int) -> float:
         data_1 = self.data_dict[f'{set}.base']['user_dict'][user_id_1]
