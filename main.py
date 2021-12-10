@@ -15,7 +15,7 @@ from src.RecommSystem import RecommSystem
 
 
 if __name__ == '__main__':
-    n_neighbors_list = list(range(5, 101, 5))
+    n_neighbors_list = list(range(5, 11, 5))
     set_list = ['u1', 'u2', 'u3', 'u4', 'u5']
     col_list = ['k', 'u1', 'u2', 'u3', 'u4', 'u5', 'mean', 'std']
 
@@ -26,8 +26,6 @@ if __name__ == '__main__':
     data_manager = DataManager(file_path=join('data', 'MovieLens-100k', 'ml-100k'))
 
     for n_neighbors in n_neighbors_list:
-        data_manager.set_neighbors(n_neighbors)
-
         mae_dict = {}
         rmse_dict = {}
         n_invalid_dict = {}
@@ -36,7 +34,8 @@ if __name__ == '__main__':
             recomm_system = RecommSystem(learning_data=data_manager[f'{set_name}.base'],
                                          testing_data=data_manager[f'{set_name}.test'])
 
-            mae, rmse, n_invalid = recomm_system(f'{n_neighbors=}, {set_name=}')
+            mae, rmse, n_invalid = recomm_system(run_name=f'{n_neighbors=}, {set_name=}',
+                                                 n_neighbors=n_neighbors)
 
             mae_dict[set_name] = mae
             rmse_dict[set_name] = rmse

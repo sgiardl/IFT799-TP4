@@ -17,7 +17,9 @@ class RecommSystem:
         self.learning_data = learning_data
         self.testing_data = testing_data
 
-    def __call__(self, run_name: str) -> (float, float, int):
+    def __call__(self, *,
+                 run_name: str,
+                 n_neighbors: int) -> (float, float, int):
         rating_true_list = []
         rating_pred_list = []
         n_invalid = 0
@@ -28,6 +30,7 @@ class RecommSystem:
             user_id = row['user id']
             item_id = row['item id']
 
+            n_neighbors_valid = 0
             numerator = 0
             denominator = 0
 
@@ -39,6 +42,10 @@ class RecommSystem:
                 if not neighbor_rating.empty:
                     numerator += row_nn['pearson'] * neighbor_rating.item()
                     denominator += abs(row_nn['pearson'])
+                    n_neighbors_valid += 1
+
+                if n_neighbors_valid == n_neighbors:
+                    break
 
             if denominator > 0:
                 rating_true_list.append(row['rating'])

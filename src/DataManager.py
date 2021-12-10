@@ -71,6 +71,7 @@ class DataManager:
         self.ratings = self.get_info(2)
 
         self.process_data()
+        self.set_neighbors()
 
         print('Done!')
 
@@ -111,14 +112,13 @@ class DataManager:
 
             self.data_dict[f'{set_name}.base']['full_pearson'] = pearson_df
 
-    def set_neighbors(self, n_neighbors: int) -> None:
+    def set_neighbors(self) -> None:
         for set_name in self.set_list:
             pearson_df = self.data_dict[f'{set_name}.base']['full_pearson']
 
             self.data_dict[f'{set_name}.base']['neighbors'] = {i:
                 pearson_df.loc[(pearson_df['user id 1'] == i) | (pearson_df['user id 2'] == i)]
                 .sort_values(['pearson', 'n common'], ascending=[False, False])
-                .head(n_neighbors)
                 for i in range(1, self.users + 1)}
 
     def get_similarity(self, set_name: str, user_id_1: int, user_id_2: int) -> (float, int):
