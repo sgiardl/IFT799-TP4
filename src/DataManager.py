@@ -134,7 +134,7 @@ class DataManager:
         if len(masked_data_1) >= 2 and masked_data_1.std() > 0 and masked_data_2.std() > 0:
             return pearsonr(masked_data_1, masked_data_2)[0], len(masked_data_1)
         else:
-            return 0, len(masked_data_1)
+            return np.nan, len(masked_data_1)
 
     @staticmethod
     def get_mask(data_1: pd.DataFrame, data_2: pd.DataFrame) -> pd.DataFrame:

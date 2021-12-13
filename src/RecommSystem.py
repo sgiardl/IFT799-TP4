@@ -6,6 +6,7 @@ Olivier Lefebvre
 Simon Giard-Leroux
 """
 
+import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from tqdm import tqdm
 
@@ -39,7 +40,7 @@ class RecommSystem:
                 df = self.learning_data['user_dict'][neighbor_id]
                 neighbor_rating = df.loc[df['item id'] == item_id]['rating']
 
-                if not neighbor_rating.empty:
+                if not neighbor_rating.empty and not np.isnan(row_nn['pearson']):
                     numerator += row_nn['pearson'] * neighbor_rating.item()
                     denominator += abs(row_nn['pearson'])
                     n_neighbors_valid += 1

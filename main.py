@@ -15,7 +15,7 @@ from src.RecommSystem import RecommSystem
 
 
 if __name__ == '__main__':
-    n_neighbors_list = list(range(5, 11, 5))
+    n_neighbors_list = list(range(5, 26, 5))
     set_list = ['u1', 'u2', 'u3', 'u4', 'u5']
     col_list = ['k', 'u1', 'u2', 'u3', 'u4', 'u5', 'mean', 'std']
 
