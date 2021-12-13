@@ -23,7 +23,7 @@ if __name__ == '__main__':
     rmse_df = pd.DataFrame(columns=col_list)
     n_invalid_df = pd.DataFrame(columns=col_list)
 
-    data_manager = DataManager(file_path=join('data', 'MovieLens-100k', 'ml-100k'))
+    data_manager = DataManager(file_path=join('data'))
 
     for n_neighbors in n_neighbors_list:
         mae_dict = {}
